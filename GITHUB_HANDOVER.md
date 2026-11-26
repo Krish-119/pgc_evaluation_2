@@ -1,9 +1,9 @@
 # GitHub Handover & Repository Management Document
 
 **Project:** CUDA Softmax and Kernel Fusion  
-**Repository Name:** `cuda-softmax-kernel-fusion`  
+**Repository Name:** `pgc_evaluation_2`  
 **Target Platform:** NVIDIA GeForce RTX 3050 6GB Laptop GPU (Ampere sm_86, CUDA 13.4, MSVC 2022)  
-**Initial Commit:** `e9e1540`  
+**Initial Commit:** `ed272bd`  
 **Git Tag:** `v1.0.0`  
 **Default Branch:** `main`  
 **Repository Visibility:** `Private` (to preserve academic integrity prior to final evaluation)
@@ -14,13 +14,14 @@
 
 | Property | Value |
 |:---|:---|
-| **Repository Name** | `cuda-softmax-kernel-fusion` |
-| **Owner / Namespace** | `Arihant-57` (or authenticated GitHub profile) |
-| **Remote Repository URL** | `https://github.com/Arihant-57/cuda-softmax-kernel-fusion` |
-| **Clone URL (HTTPS)** | `https://github.com/Arihant-57/cuda-softmax-kernel-fusion.git` |
-| **Clone URL (SSH)** | `git@github.com:Arihant-57/cuda-softmax-kernel-fusion.git` |
+| **Repository Name** | `pgc_evaluation_2` |
+| **Owner / Namespace** | `Krish-119` |
+| **Remote Repository URL** | `https://github.com/Krish-119/pgc_evaluation_2` |
+| **Clone URL (HTTPS)** | `https://github.com/Krish-119/pgc_evaluation_2.git` |
+| **Clone URL (SSH)** | `git@github.com:Krish-119/pgc_evaluation_2.git` |
 | **Release Tag** | `v1.0.0` |
 | **Release Title** | `CUDA Softmax and Kernel Fusion v1.0.0` |
+| **Release URL** | `https://github.com/Krish-119/pgc_evaluation_2/releases/tag/v1.0.0` |
 | **Attached Assets** | `Softmax_Kernel_Fusion.zip` (Portable sanitized archive, 2.80 MB) |
 | **Visibility** | **Private** (Do not make public until evaluated) |
 
@@ -42,8 +43,8 @@ To clone this repository on another workstation or Linux/Windows system:
 
 ```bash
 # Clone using HTTPS
-git clone https://github.com/Arihant-57/cuda-softmax-kernel-fusion.git
-cd cuda-softmax-kernel-fusion
+git clone https://github.com/Krish-119/pgc_evaluation_2.git
+cd pgc_evaluation_2
 
 # Verify clean Git working tree
 git status
@@ -80,7 +81,7 @@ git push origin --tags
 Once your institutional academic evaluation and viva voce are complete and you wish to showcase this project publicly on your portfolio:
 
 1. Open your repository on GitHub:
-   `https://github.com/Arihant-57/cuda-softmax-kernel-fusion`
+   `https://github.com/Krish-119/pgc_evaluation_2`
 2. Click the **Settings** tab in the top navigation bar.
 3. Scroll down to the **Danger Zone** at the bottom of the General settings page.
 4. Locate **Change repository visibility** and click **Change visibility**.
