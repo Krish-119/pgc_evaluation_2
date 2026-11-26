@@ -1,0 +1,25 @@
+
+========================================================================
+          SOFTMAX AND KERNEL FUSION USING CUDA - PGC LAB
+========================================================================
+  Active GPU Hardware : NVIDIA GeForce RTX 3050 6GB Laptop GPU
+  Compute Capability  : 8.6
+  SM Multiprocessors  : 20
+  Global Memory (VRAM): 6.00 GB
+  Shared Memory/Block : 48 KB (49152 bytes)
+========================================================================
+
+
+>>> [MODE 5] BLOCK SIZE ANALYSIS (64, 128, 256, 512, 1024 THREADS) <<<
+Evaluating fixed matrix dimensions: 2048 rows x 1024 columns
+
+Block Size    Separate (ms)   Fused (ms)    Speedup     Eff Bandwidth     Status    
+------------------------------------------------------------------------------------
+64            0.2278          0.1158        1.97x       144.87 GB/s       PASS      
+128           0.2277          0.1148        1.98x       146.19 GB/s       PASS      
+256           0.2290          0.1152        1.99x       145.64 GB/s       PASS      
+512           0.2809          0.1820        1.54x       92.17 GB/s        PASS      
+1024          0.5325          0.4373        1.22x       38.37 GB/s        PASS      
+------------------------------------------------------------------------------------
+
+[INFO] Benchmark CSV exported to: results/block_size_results.csv

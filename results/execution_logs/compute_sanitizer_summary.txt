@@ -1,0 +1,33 @@
+========================================================================
+             NVIDIA COMPUTE-SANITIZER VERIFICATION REPORT
+========================================================================
+Date: 2026-11-24
+Target: build/correctness_tests.exe
+GPU: NVIDIA GeForce RTX 3050 6GB Laptop GPU (Compute Capability 8.6)
+CUDA Toolkit: 13.4.17
+
+1. Memcheck (Out-of-bounds, unaligned access, illegal address)
+   Command: compute-sanitizer --tool memcheck build\correctness_tests.exe
+   Result: 12 / 12 Tests Passed.
+   Summary: 0 errors
+
+2. Racecheck (Shared memory hazards: RAW, WAR, WAW)
+   Command: compute-sanitizer --tool racecheck build\correctness_tests.exe
+   Result: 12 / 12 Tests Passed.
+   Summary: 0 hazards displayed (0 errors, 0 warnings)
+
+3. Synccheck (Thread divergence barrier synchronization violations)
+   Command: compute-sanitizer --tool synccheck build\correctness_tests.exe
+   Result: 12 / 12 Tests Passed.
+   Summary: 0 errors
+
+4. Initcheck (Uninitialized global and device memory access)
+   Command: compute-sanitizer --tool initcheck build\correctness_tests.exe
+   Result: 12 / 12 Tests Passed.
+   Summary: 0 errors
+
+CONCLUSION:
+Both the 3-kernel separate pipeline and the dynamic shared-memory cached
+fused kernel implementation (and streaming fallback) are completely free
+from memory safety, race condition, synchronization, or initialization errors.
+========================================================================

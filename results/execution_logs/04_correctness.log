@@ -1,0 +1,11 @@
+
+========================================================================
+     AUTONOMOUS CORRECTNESS & NUMERICAL STABILITY TEST SUITE
+========================================================================
+GPU: NVIDIA GeForce RTX 3050 6GB Laptop GPU (Compute 8.6)
+Shared Memory per Block: 48 KB
+
+Test Suite Finished: 13 / 13 Passed.
+Overall Status: [PASS]
+Report written to results/correctness_results.txt
+

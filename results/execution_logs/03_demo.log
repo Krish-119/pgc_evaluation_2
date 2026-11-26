@@ -1,0 +1,46 @@
+
+========================================================================
+          SOFTMAX AND KERNEL FUSION USING CUDA - PGC LAB
+========================================================================
+  Active GPU Hardware : NVIDIA GeForce RTX 3050 6GB Laptop GPU
+  Compute Capability  : 8.6
+  SM Multiprocessors  : 20
+  Global Memory (VRAM): 6.00 GB
+  Shared Memory/Block : 48 KB (49152 bytes)
+========================================================================
+
+
+>>> [MODE 1] SOFTMAX DEMONSTRATION MODE <<<
+Input Matrix: 2 rows x 4 columns (Mandatory Evaluation Case)
+
+--- Matrix: Input Matrix X (2 x 4) ---
+  Row   0: [   1.000000   2.000000   3.000000   4.000000 ]
+  Row   1: [   2.000000   1.000000   0.000000   3.000000 ]
+
+
+--- Matrix: CPU Reference Softmax Output (2 x 4) ---
+  Row   0: [   0.032059   0.087144   0.236883   0.643914 ]
+  Row   1: [   0.236883   0.087144   0.032059   0.643914 ]
+
+
+--- Matrix: CUDA Separate Kernels Output (2 x 4) ---
+  Row   0: [   0.032059   0.087144   0.236883   0.643914 ]
+  Row   1: [   0.236883   0.087144   0.032059   0.643914 ]
+
+
+--- Matrix: CUDA Fused Kernel Output (2 x 4) ---
+  Row   0: [   0.032059   0.087144   0.236883   0.643914 ]
+  Row   1: [   0.236883   0.087144   0.032059   0.643914 ]
+
+--- Execution & Verification Summary ---
+  CPU Execution Time          : 0.0032 ms
+  Separate Kernel 1 (Row Max) : 0.2959 ms
+  Separate Kernel 2 (Exp Sum) : 0.0963 ms
+  Separate Kernel 3 (Normalize): 0.1042 ms
+  Total Separate Pipeline Time: 0.0512 ms
+  Fused Kernel Execution Time : 0.0133 ms (SharedMemCached)
+  Speedup (Separate / Fused)  : 3.84x
+  Separate Output Status      : [PASS] (Max Abs Error: 5.96e-08)
+  Fused Output Status         : [PASS] (Max Abs Error: 5.96e-08)
+  Row-Sum Check (|Sum - 1.0|) : 5.22e-08
+----------------------------------------

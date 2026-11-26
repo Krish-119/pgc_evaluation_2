@@ -1,0 +1,66 @@
+========================================================================
+        CUDA SOFTMAX & KERNEL FUSION - SYSTEM HARDWARE & SOFTWARE REPORT
+========================================================================
+Timestamp: 2026-11-24 00:38:14
+
+--- [1] HOST OPERATING SYSTEM & ARCHITECTURE ---
+OS: Windows 11 (Version: 10.0.26300)
+Architecture: AMD64
+Platform Detail: Windows-11-10.0.26300-SP0
+
+--- [2] CPU DETAILS & SYSTEM RAM ---
+Processor: Intel64 Family 6 Model 183 Stepping 1, GenuineIntel
+Physical CPU Cores: 14
+Logical CPU Processors (Threads): 20
+Total Physical RAM: 15.78 GB
+Available RAM: 6.96 GB (55.9% used)
+
+--- [3] NVIDIA GPU STATUS (nvidia-smi) ---
+name, driver_version, memory.total [MiB], compute_cap
+NVIDIA GeForce RTX 3050 6GB Laptop GPU, 621.24, 6144 MiB, 8.6
+
+Tue Nov 24 00:38:14 2026       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 621.24                 KMD Version: 621.24        CUDA UMD Version: 13.5     |
++-----------------------------------------+------------------------+----------------------+
+| GPU  Name                  Driver-Model | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  NVIDIA GeForce RTX 3050 ...  WDDM  |   00000000:01:00.0  On |                  N/A |
+| N/A   53C    P0              9W /   95W |    1135MiB /   6144MiB |      7%      Default |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+
+--- [4] NVIDIA CUDA COMPILER (nvcc) ---
+nvcc: NVIDIA (R) Cuda compiler driver
+Copyright (c) 2005-2026 NVIDIA Corporation
+Built on Sun_Sep_01_02:23:07_Pacific_Standard_Time_2026
+Cuda compilation tools, release 13.4, V13.4.92
+Build cuda_13.4.r13.4/compiler.38855100_0
+
+--- [5] MICROSOFT VISUAL C++ COMPILER (MSVC) ---
+MSVC 2022 Build Tools vcvars64.bat FOUND at:
+  C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvars64.bat
+MSVC cl location:
+**********************************************************************
+** Visual Studio 2022 Developer Command Prompt v17.14.45
+** Copyright (c) 2025 Microsoft Corporation
+**********************************************************************
+[vcvarsall.bat] Environment initialized for: 'x64'
+C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.44.35207\bin\Hostx64\x64\cl.exe
+
+--- [6] PYTHON ENVIRONMENT & LIBRARIES ---
+Python Executable: C:\Users\ariha\AppData\Local\Programs\Python\Python313\python.exe
+Python Version: 3.13.2
+  - numpy: 2.4.4
+  - pandas: 2.2.3
+  - matplotlib: 3.9.3
+  - docx: 1.2.0
+  - pptx: 1.0.2
+  - PIL: 11.1.0
+  - psutil: 7.2.2
+
+========================================================================
+END OF SYSTEM INFORMATION REPORT
+========================================================================

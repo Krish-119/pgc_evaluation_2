@@ -1,0 +1,19 @@
+========================================================================
+       CUDA SOFTMAX AND KERNEL FUSION - PROJECT COMPILATION
+========================================================================
+
+[1/3] Locating Microsoft Visual Studio MSVC environment...
+Found MSVC environment: "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvars64.bat"
+
+[2/3] Compiling main application (src/main.cu -> build/softmax_fusion.exe)...
+main.cu
+[OK] main application compiled successfully: "C:\Users\ariha\Desktop\PGC LAB\Softmax_Kernel_Fusion\scripts\..\build\softmax_fusion.exe"
+
+[3/3] Compiling test suite (tests/correctness_tests.cu -> build/correctness_tests.exe)...
+correctness_tests.cu
+[OK] test suite compiled successfully: "C:\Users\ariha\Desktop\PGC LAB\Softmax_Kernel_Fusion\scripts\..\build\correctness_tests.exe"
+
+========================================================================
+ALL TARGETS COMPILED SUCCESSFULLY
+Binaries located in: C:\Users\ariha\Desktop\PGC LAB\Softmax_Kernel_Fusion\scripts\..\build
+========================================================================

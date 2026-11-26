@@ -1,0 +1,28 @@
+========================================================================
+       CUDA SOFTMAX AND KERNEL FUSION - ENVIRONMENT VERIFICATION
+========================================================================
+
+[1/4] Checking NVIDIA Driver and GPU...
+name, driver_version, memory.total [MiB], compute_cap
+NVIDIA GeForce RTX 3050 6GB Laptop GPU, 621.24, 6144 MiB, 8.6
+
+[2/4] Checking NVIDIA CUDA Compiler (nvcc)...
+nvcc: NVIDIA (R) Cuda compiler driver
+Copyright (c) 2005-2026 NVIDIA Corporation
+Built on Sun_Sep_01_02:23:07_Pacific_Standard_Time_2026
+Cuda compilation tools, release 13.4, V13.4.92
+Build cuda_13.4.r13.4/compiler.38855100_0
+
+[3/4] Checking Microsoft Visual C++ Compiler (MSVC)...
+[OK] Found MSVC vcvars64.bat: "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvars64.bat"
+
+[4/4] Checking Python Environment...
+Python 3.13.2
+
+Running comprehensive Python environment inspector...
+System information saved to C:\Users\ariha\Desktop\PGC LAB\Softmax_Kernel_Fusion\results\system_information.txt
+
+========================================================================
+Environment verification completed successfully.
+Report saved to results/system_information.txt
+========================================================================

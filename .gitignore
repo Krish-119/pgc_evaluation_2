@@ -1,0 +1,63 @@
+# =========================================================================
+# CUDA Softmax and Kernel Fusion - .gitignore
+# =========================================================================
+
+# Compiled Binaries & Build Output
+build/
+bin/
+obj/
+*.exe
+*.obj
+*.o
+*.lib
+*.a
+*.dll
+*.so
+*.dylib
+*.pdb
+*.ilk
+*.exp
+
+# Python Caches & Bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyd
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Python Virtual Environments
+venv/
+env/
+.env
+.venv/
+ENV/
+
+# IDE & Editor Files
+.vs/
+.vscode/
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# OS & Temporary Artifacts
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.tmp
+*.temp
+screenshots/temp_html/
+
+# Windows Desktop Shortcuts & Local Link Files
+*.lnk
+LAUNCH_PROJECT.bat
+
+# Archive Files (Deliverables include clean generator scripts)
+*.zip
+*.tar.gz
+*.7z
+*.rar

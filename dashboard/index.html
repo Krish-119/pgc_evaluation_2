@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CUDA Softmax & Kernel Fusion — Engineering Lab Dashboard</title>
+  <style>
+    :root {
+      --bg: #F8FAFC;
+      --surface: #FFFFFF;
+      --card-bg: #FFFFFF;
+      --border: #E2E8F0;
+      --border-dark: #CBD5E1;
+      --text: #0F172A;
+      --text-muted: #64748B;
+      --navy: #0F172A;
+      --navy-light: #1E293B;
+      --primary: #0284C7;
+      --primary-hover: #0369A1;
+      --accent: #2563EB;
+      --success: #059669;
+      --success-bg: #ECFDF5;
+      --warning: #D97706;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font-sans);
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      padding: 0;
+    }
+
+    header {
+      background: var(--navy);
+      color: #FFFFFF;
+      padding: 1.25rem 2rem;
+      border-bottom: 2px solid var(--primary);
+    }
+    .header-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .title-group h1 {
+      font-size: 1.35rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+    .title-group p {
+      font-size: 0.85rem;
+      color: #94A3B8;
+      margin-top: 0.15rem;
+    }
+    .meta-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: var(--navy-light);
+      padding: 0.4rem 0.85rem;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      border: 1px solid #334155;
+    }
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      background: #10B981;
+      border-radius: 50%;
+    }
+
+    nav {
+      background: #FFFFFF;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+    .nav-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      gap: 1.5rem;
+      padding: 0 2rem;
+    }
+    .nav-tab {
+      padding: 0.85rem 0.25rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      border-bottom: 2px solid transparent;
+      cursor: pointer;
+      text-decoration: none;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .nav-tab:hover, .nav-tab.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+    }
+
+    main {
+      max-width: 1400px;
+      margin: 1.5rem auto 3rem;
+      padding: 0 2rem;
+    }
+
+    .section {
+      display: none;
+      animation: fadeIn 0.2s ease-in-out;
+    }
+    .section.active {
+      display: block;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .metric-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 1.25rem;
+    }
+    .metric-title {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+    .metric-val {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--navy);
+      margin: 0.25rem 0;
+    }
+    .metric-sub {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.25rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .panel-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--navy);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+    th, td {
+      padding: 0.65rem 0.85rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    th {
+      background: #F1F5F9;
+      font-weight: 600;
+      color: var(--navy);
+    }
+    tr:hover td {
+      background: #F8FAFC;
+    }
+    .mono { font-family: var(--font-mono); }
+    .badge {
+      display: inline-block;
+      padding: 0.2rem 0.5rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      border-radius: 4px;
+    }
+    .badge-pass { background: #DCFCE7; color: #166534; }
+    .badge-blue { background: #E0F2FE; color: #0369A1; }
+
+    .btn {
+      background: var(--primary);
+      color: #FFFFFF;
+      border: none;
+      padding: 0.5rem 1rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      border-radius: 4px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .btn:hover { background: var(--primary-hover); }
+
+    .demo-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+    @media (max-width: 900px) {
+      .demo-grid { grid-template-columns: 1fr; }
+    }
+    textarea {
+      width: 100%;
+      height: 110px;
+      font-family: var(--font-mono);
+      font-size: 0.9rem;
+      padding: 0.75rem;
+      border: 1px solid var(--border-dark);
+      border-radius: 4px;
+      resize: vertical;
+    }
+    .step-box {
+      background: #F8FAFC;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 1rem;
+      margin-bottom: 0.75rem;
+      font-family: var(--font-mono);
+      font-size: 0.825rem;
+    }
+    .step-title {
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 0.35rem;
+      font-family: var(--font-sans);
+      font-size: 0.85rem;
+    }
+
+    .img-container {
+      background: #F8FAFC;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 1rem;
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+    .img-container img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 4px;
+    }
+    .img-caption {
+      font-size: 0.825rem;
+      color: var(--text-muted);
+      margin-top: 0.5rem;
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-container">
+      <div class="title-group">
+        <h1>CUDA Softmax & Kernel Fusion — Engineering Lab Dashboard</h1>
+        <p>Theme 10: Academic GPU Performance & Memory Traffic Evaluation</p>
+      </div>
+      <div class="meta-badge">
+        <span class="status-dot"></span>
+        <span>Target: NVIDIA GeForce RTX 3050 6GB Laptop GPU (Compute 8.6, sm_86)</span>
+      </div>
+    </div>
+  </header>
+
+  <nav>
+    <div class="nav-container">
+      <a class="nav-tab active" onclick="switchTab('overview')">Overview</a>
+      <a class="nav-tab" onclick="switchTab('interactive')">Interactive Demo</a>
+      <a class="nav-tab" onclick="switchTab('architecture')">Architecture & Fusion</a>
+      <a class="nav-tab" onclick="switchTab('performance')">Performance & Charts</a>
+      <a class="nav-tab" onclick="switchTab('results')">Benchmark Data (CSV)</a>
+    </div>
+  </nav>
+
+  <main>
+    <!-- 1. OVERVIEW -->
+    <div id="overview" class="section active">
+      <div class="grid-4">
+        <div class="metric-card">
+          <div class="metric-title">Peak Fusion Speedup</div>
+          <div class="metric-val" id="ov-speedup">1.97x - 2.93x</div>
+          <div class="metric-sub">Up to 65.9% Execution Time Saved</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-title">Memory Traffic Reduction</div>
+          <div class="metric-val">50.0% Less</div>
+          <div class="metric-sub">Dynamic Shared-Memory Caching (8RC vs 16RC+20R)</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-title">Optimal Block Size</div>
+          <div class="metric-val">128 - 256 Threads</div>
+          <div class="metric-sub">146.2 GB/s Effective Bandwidth</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-title">Validation Status</div>
+          <div class="metric-val" style="color: var(--success);">12 / 12 PASS</div>
+          <div class="metric-sub">Matched within FP32 Tolerance (&lt; 10⁻⁵)</div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">System & Execution Environment Summary</div>
+          <span class="badge badge-pass">CUDA 13.4 Verified</span>
+        </div>
+        <table>
+          <tbody>
+            <tr><th style="width:250px;">Host Operating System</th><td>Windows 11 (Version 10.0.26300, 64-bit AMD64)</td></tr>
+            <tr><th>Host CPU Processor</th><td>Intel64 Family 6 Model 183 Stepping 1 (14 Cores / 20 Threads, 15.78 GB RAM)</td></tr>
+            <tr><th>GPU Accelerator</th><td>NVIDIA GeForce RTX 3050 6GB Laptop GPU (Ampere Architecture, sm_86)</td></tr>
+            <tr><th>VRAM & Bandwidth</th><td>6144 MB GDDR6 (96-bit bus, ~192 GB/s theoretical)</td></tr>
+            <tr><th>NVIDIA Driver / CUDA UMD</th><td>Driver 621.24 | CUDA Driver Version 13.5 | Toolkit nvcc 13.4.92</td></tr>
+            <tr><th>Host Compiler</th><td>Microsoft Visual C++ (MSVC) 2022 Build Tools (14.44.35207)</td></tr>
+            <tr><th>Mathematical Guarantee</th><td>Numerically stable row-wise Softmax: <code>Softmax(x_i) = exp(x_i - max) / sum(exp(x_j - max))</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">Key Benchmark Summary (Measured with CUDA Events, 10 Warmup + 100 Runs)</div>
+          <button class="btn" onclick="switchTab('results')">View Full Results</button>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Matrix Configuration</th>
+              <th>Dimensions</th>
+              <th>CPU Ref (ms)</th>
+              <th>Separate Kernels (ms)</th>
+              <th>Fused Kernel (ms)</th>
+              <th>Speedup</th>
+              <th>Memory Saved</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Mandatory Evaluation Matrix</strong></td>
+              <td class="mono">4096 x 1024</td>
+              <td class="mono">34.43 ms</td>
+              <td class="mono">0.4448 ms</td>
+              <td class="mono"><strong>0.2261 ms</strong></td>
+              <td><span class="badge badge-blue">1.97x</span></td>
+              <td class="mono">33.6 MB (50.1%)</td>
+              <td><span class="badge badge-pass">PASS</span></td>
+            </tr>
+            <tr>
+              <td>Medium Scale</td>
+              <td class="mono">2048 x 512</td>
+              <td class="mono">8.64 ms</td>
+              <td class="mono">0.1416 ms</td>
+              <td class="mono"><strong>0.0905 ms</strong></td>
+              <td><span class="badge badge-blue">1.56x</span></td>
+              <td class="mono">8.4 MB (50.1%)</td>
+              <td><span class="badge badge-pass">PASS</span></td>
+            </tr>
+            <tr>
+              <td>Standard Scale</td>
+              <td class="mono">1024 x 256</td>
+              <td class="mono">2.32 ms</td>
+              <td class="mono">0.0554 ms</td>
+              <td class="mono"><strong>0.0420 ms</strong></td>
+              <td><span class="badge badge-blue">1.32x</span></td>
+              <td class="mono">2.1 MB (50.2%)</td>
+              <td><span class="badge badge-pass">PASS</span></td>
+            </tr>
+            <tr>
+              <td>Non-Power-of-Two (Irregular)</td>
+              <td class="mono">128 x 127</td>
+              <td class="mono">0.13 ms</td>
+              <td class="mono">0.0319 ms</td>
+              <td class="mono"><strong>0.0109 ms</strong></td>
+              <td><span class="badge badge-blue">2.93x</span></td>
+              <td class="mono">0.1 MB (50.5%)</td>
+              <td><span class="badge badge-pass">PASS</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 2. INTERACTIVE DEMO -->
+    <div id="interactive" class="section">
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">Interactive Softmax Educational Simulator (Client-side Algorithmic Walkthrough)</div>
+          <button class="btn" onclick="resetDemo()">Reset to Mandatory 2x4 Matrix</button>
+        </div>
+        <p style="margin-bottom:1rem; font-size:0.875rem; color:var(--text-muted);">
+          <strong>Educational Notice:</strong> The step-by-step calculator below runs in client-side JavaScript to illustrate the exact intermediate mathematical stages (Max, Shifted, Exponentials, Sum, Normalization) executed by our native CUDA kernels. All benchmark, timing, and bandwidth figures in other tabs represent <strong>genuine native CUDA execution on the NVIDIA GeForce RTX 3050 Laptop GPU</strong> measured via CUDA Events.
+        </p>
+
+        <div class="demo-grid">
+          <div>
+            <label style="font-weight:600; font-size:0.85rem; display:block; margin-bottom:0.4rem;">Matrix Input (One Row per Line):</label>
+            <textarea id="demo-input">1.0 2.0 3.0 4.0&#10;2.0 1.0 0.0 3.0</textarea>
+            <button class="btn" style="margin-top:0.75rem;" onclick="computeSoftmaxDemo()">Compute Softmax Steps</button>
+          </div>
+
+          <div>
+            <div id="demo-output">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. ARCHITECTURE -->
+    <div id="architecture" class="section">
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">Architectural Comparison: Separate Kernels vs Fused Kernel</div>
+        </div>
+        <p style="margin-bottom:1rem; font-size:0.875rem; color:var(--text-muted);">
+          Softmax is memory-bandwidth bound. In the separate implementation, 3 kernels must be launched with 2 intermediate global memory round-trips. In the fused implementation, 1 block is mapped per row, executing tree reductions in fast shared memory and eliminating intermediate global memory traffic entirely.
+        </p>
+
+        <div class="img-container">
+          <img src="../diagrams/06_architecture_separate.png" alt="Separate Kernels Architecture">
+          <div class="img-caption">Figure 1: Baseline Architecture — 3 Separate CUDA Kernels with Global Memory Round-Trips</div>
+        </div>
+
+        <div class="img-container">
+          <img src="../diagrams/07_architecture_fused.png" alt="Fused Kernel Architecture">
+          <div class="img-caption">Figure 2: Optimized Architecture — Single Fused CUDA Kernel with In-Block Shared Memory Reductions</div>
+        </div>
+
+        <div class="panel">
+          <h3 style="font-size:1rem; font-weight:700; margin-bottom:0.75rem;">Estimated Logical Global Memory Traffic Derivation (FP32, 4 Bytes/Element — Algorithm Level vs Physical DRAM)</h3>
+          <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:0.75rem;">
+            <em>Note on Traffic Modeling:</em> These values represent <strong>estimated logical memory traffic</strong> derived from algorithmic reads and writes in global memory. Physical DRAM transactions measured via hardware profilers (such as NVIDIA Nsight Compute) may vary based on L1/L2 cache hit rates and 32-byte memory transaction coalescing.
+          </p>
+          <table>
+            <thead>
+              <tr><th>Implementation</th><th>Memory Access Sequence</th><th>Total Bytes Formula</th><th>4096 x 1024 Example</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Separate Kernels (3 Passes)</strong></td>
+                <td>Read X (K1) + Write Max + Read X (K2) + Read Max + Write Sum + Read X (K3) + Read Max + Read Sum + Write Y</td>
+                <td class="mono">16·R·C + 20·R bytes</td>
+                <td class="mono">67.19 MB (Estimated Logical)</td>
+              </tr>
+              <tr>
+                <td><strong>Fused Kernel (Shared-Memory Cached)</strong></td>
+                <td>Cooperative Load X into shared memory + In-place compute &amp; normalize + Write Y (Zero DRAM max/sum writes)</td>
+                <td class="mono">8·R·C bytes</td>
+                <td class="mono">33.55 MB (Estimated Logical)</td>
+              </tr>
+              <tr>
+                <td><strong>Net Logical Savings</strong></td>
+                <td>Eliminates 2 kernel launch overheads + 8·R·C + 20·R bytes DRAM traffic</td>
+                <td class="mono">8·R·C + 20·R bytes</td>
+                <td class="mono"><strong>33.64 MB (50.1% Saved)</strong></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. PERFORMANCE -->
+    <div id="performance" class="section">
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">Performance Evaluation Charts (Measured on NVIDIA RTX 3050)</div>
+        </div>
+
+        <div class="img-container">
+          <img src="../diagrams/01_execution_time_comparison.png" alt="Execution Time Comparison">
+          <div class="img-caption">Figure 3: Separate vs Fused Execution Time across Standard and Edge-Case Matrix Sizes</div>
+        </div>
+
+        <div class="img-container">
+          <img src="../diagrams/02_kernel_breakdown.png" alt="Kernel Breakdown">
+          <div class="img-caption">Figure 4: Execution Latency Breakdown by Individual Kernel vs Fused Total</div>
+        </div>
+
+        <div class="img-container">
+          <img src="../diagrams/03_speedup_scaling.png" alt="Speedup Scaling">
+          <div class="img-caption">Figure 5: Measured Speedup Scaling Factor (Up to 3.47x for Non-Power-of-Two Dimensions)</div>
+        </div>
+
+        <div class="img-container">
+          <img src="../diagrams/04_block_size_analysis.png" alt="Block Size Tuning">
+          <div class="img-caption">Figure 6: Block Size Tuning & Effective Memory Bandwidth (Sweet Spot at 256 Threads/Block)</div>
+        </div>
+
+        <div class="img-container">
+          <img src="../diagrams/05_memory_traffic_comparison.png" alt="Memory Traffic Comparison">
+          <div class="img-caption">Figure 7: Logical Global Memory Traffic (MB) Moved — Separate vs Fused</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. RESULTS TABLE -->
+    <div id="results" class="section">
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">Full Genuine Benchmark Dataset</div>
+          <button class="btn" onclick="downloadCSV()">Export Benchmark CSV</button>
+        </div>
+        <p style="margin-bottom:1rem; font-size:0.875rem; color:var(--text-muted);">
+          Each benchmark was measured using 10 warmup iterations and 100 timed iterations using high-precision CUDA Events. CPU reference calculated in double precision using <code>std::chrono</code>.
+        </p>
+
+        <table id="benchmark-table">
+          <thead>
+            <tr>
+              <th>Config Name</th>
+              <th>Rows</th>
+              <th>Cols</th>
+              <th>CPU Time (ms)</th>
+              <th>Sep Max (ms)</th>
+              <th>Sep Sum (ms)</th>
+              <th>Sep Norm (ms)</th>
+              <th>Sep Total (ms)</th>
+              <th>Fused (ms)</th>
+              <th>Speedup</th>
+              <th>Traffic Saved</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Populated via JS -->
+          </tbody>
+        </table>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">Block Size Analysis Dataset (2048 x 1024 Matrix)</div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Block Size (Threads)</th>
+              <th>Matrix Size</th>
+              <th>Separate Total (ms)</th>
+              <th>Fused Time (ms)</th>
+              <th>Speedup</th>
+              <th>Effective Bandwidth</th>
+              <th>Max Error vs CPU</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td class="mono">64</td><td class="mono">2048 x 1024</td><td class="mono">0.2278 ms</td><td class="mono">0.1158 ms</td><td><span class="badge badge-blue">1.97x</span></td><td class="mono">144.87 GB/s</td><td class="mono">1.86e-09</td><td><span class="badge badge-pass">PASS</span></td></tr>
+            <tr><td class="mono"><strong>128 (Top Speed)</strong></td><td class="mono">2048 x 1024</td><td class="mono">0.2277 ms</td><td class="mono"><strong>0.1148 ms</strong></td><td><span class="badge badge-blue"><strong>1.98x</strong></span></td><td class="mono"><strong>146.19 GB/s</strong></td><td class="mono">1.86e-09</td><td><span class="badge badge-pass">PASS</span></td></tr>
+            <tr><td class="mono"><strong>256 (Default)</strong></td><td class="mono">2048 x 1024</td><td class="mono">0.2290 ms</td><td class="mono"><strong>0.1152 ms</strong></td><td><span class="badge badge-blue"><strong>1.99x</strong></span></td><td class="mono"><strong>145.64 GB/s</strong></td><td class="mono">1.86e-09</td><td><span class="badge badge-pass">PASS</span></td></tr>
+            <tr><td class="mono">512</td><td class="mono">2048 x 1024</td><td class="mono">0.2809 ms</td><td class="mono">0.1820 ms</td><td><span class="badge badge-blue">1.54x</span></td><td class="mono">92.17 GB/s</td><td class="mono">1.86e-09</td><td><span class="badge badge-pass">PASS</span></td></tr>
+            <tr><td class="mono">1024</td><td class="mono">2048 x 1024</td><td class="mono">0.5325 ms</td><td class="mono">0.4373 ms</td><td><span class="badge badge-blue">1.22x</span></td><td class="mono">38.37 GB/s</td><td class="mono">1.86e-09</td><td><span class="badge badge-pass">PASS</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const benchData = [
+      { config: "Config_1024x256", rows: 1024, cols: 256, cpu: 2.3231, sMax: 0.0203, sSum: 0.0246, sNorm: 0.0174, sTot: 0.0554, fused: 0.0420, speedup: 1.32, saved: "2.1 MB (50%)", pass: true },
+      { config: "Config_2048x512", rows: 2048, cols: 512, cpu: 8.6390, sMax: 0.0440, sSum: 0.0468, sNorm: 0.0552, sTot: 0.1416, fused: 0.0905, speedup: 1.56, saved: "8.4 MB (50%)", pass: true },
+      { config: "Config_4096x1024", rows: 4096, cols: 1024, cpu: 34.4336, sMax: 0.1137, sSum: 0.1104, sNorm: 0.2180, sTot: 0.4448, fused: 0.2261, speedup: 1.97, saved: "33.6 MB (50%)", pass: true },
+      { config: "Config_1024x2048", rows: 1024, cols: 2048, cpu: 17.1711, sMax: 0.0635, sSum: 0.0592, sNorm: 0.1106, sTot: 0.2265, fused: 0.1151, speedup: 1.97, saved: "16.8 MB (50%)", pass: true },
+      { config: "Config_1024x4096", rows: 1024, cols: 4096, cpu: 36.7537, sMax: 0.1147, sSum: 0.1085, sNorm: 0.2171, sTot: 0.4409, fused: 0.2273, speedup: 1.94, saved: "33.6 MB (50%)", pass: true },
+      { config: "Config_128x127_NonPow2", rows: 128, cols: 127, cpu: 0.1345, sMax: 0.0072, sSum: 0.0072, sNorm: 0.0061, sTot: 0.0319, fused: 0.0109, speedup: 2.93, saved: "0.1 MB (50%)", pass: true },
+      { config: "Config_1024x1000_Irreg", rows: 1024, cols: 1000, cpu: 8.5445, sMax: 0.0461, sSum: 0.0416, sNorm: 0.0553, sTot: 0.1402, fused: 0.0777, speedup: 1.80, saved: "8.2 MB (50%)", pass: true }
+    ];
+
+    function populateTable() {
+      const tbody = document.querySelector("#benchmark-table tbody");
+      tbody.innerHTML = "";
+      benchData.forEach(d => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td><strong>${d.config}</strong></td>
+          <td class="mono">${d.rows}</td>
+          <td class="mono">${d.cols}</td>
+          <td class="mono">${d.cpu.toFixed(2)}</td>
+          <td class="mono">${d.sMax.toFixed(4)}</td>
+          <td class="mono">${d.sSum.toFixed(4)}</td>
+          <td class="mono">${d.sNorm.toFixed(4)}</td>
+          <td class="mono">${d.sTot.toFixed(4)}</td>
+          <td class="mono"><strong>${d.fused.toFixed(4)}</strong></td>
+          <td><span class="badge badge-blue">${d.speedup.toFixed(2)}x</span></td>
+          <td class="mono">${d.saved}</td>
+          <td><span class="badge badge-pass">PASS</span></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function switchTab(tabId) {
+      document.querySelectorAll(".nav-tab").forEach(t => t.classList.remove("active"));
+      document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
+      
+      const tab = Array.from(document.querySelectorAll(".nav-tab")).find(t => t.getAttribute("onclick").includes(tabId));
+      if (tab) tab.classList.add("active");
+      
+      const sec = document.getElementById(tabId);
+      if (sec) sec.classList.add("active");
+    }
+
+    function resetDemo() {
+      document.getElementById("demo-input").value = "1.0 2.0 3.0 4.0\n2.0 1.0 0.0 3.0";
+      computeSoftmaxDemo();
+    }
+
+    function computeSoftmaxDemo() {
+      const text = document.getElementById("demo-input").value.trim();
+      const lines = text.split("\n").filter(l => l.trim().length > 0);
+      const container = document.getElementById("demo-output");
+      container.innerHTML = "";
+
+      lines.forEach((line, rIdx) => {
+        const vals = line.trim().split(/\s+/).map(Number).filter(n => !isNaN(n));
+        if (vals.length === 0) return;
+
+        const maxVal = Math.max(...vals);
+        const shifted = vals.map(v => v - maxVal);
+        const exps = shifted.map(Math.exp);
+        const sumExp = exps.reduce((a, b) => a + b, 0);
+        const probs = exps.map(e => e / sumExp);
+        const probSum = probs.reduce((a, b) => a + b, 0);
+
+        const card = document.createElement("div");
+        card.className = "step-box";
+        card.innerHTML = `
+          <div class="step-title">Row ${rIdx} (${vals.length} elements):</div>
+          <div><strong>Input X:</strong> [ ${vals.map(v => v.toFixed(2)).join(", ")} ]</div>
+          <div><strong>Step 1 Max Value (m):</strong> ${maxVal.toFixed(4)} (Prevents exp overflow)</div>
+          <div><strong>Step 2 Shifted (x - m):</strong> [ ${shifted.map(s => s.toFixed(2)).join(", ")} ]</div>
+          <div><strong>Step 3 Exponentials e^(x - m):</strong> [ ${exps.map(e => e.toFixed(4)).join(", ")} ]</div>
+          <div><strong>Step 4 Sum of Exponentials:</strong> ${sumExp.toFixed(6)}</div>
+          <div style="color:var(--primary); font-weight:700; margin-top:0.25rem;">
+            <strong>Step 5 Softmax Probabilities:</strong><br>[ ${probs.map(p => p.toFixed(6)).join(", ")} ]
+          </div>
+          <div style="color:var(--success); font-size:0.75rem; margin-top:0.25rem;">
+            Row-Sum Check: ${probSum.toFixed(8)} (${Math.abs(probSum - 1.0) < 1e-5 ? "VALID ~ 1.0" : "DEVIATION"})
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function downloadCSV() {
+      window.location.href = "../results/benchmark_results.csv";
+    }
+
+    window.onload = function() {
+      populateTable();
+      computeSoftmaxDemo();
+    };
+  </script>
+</body>
+</html>

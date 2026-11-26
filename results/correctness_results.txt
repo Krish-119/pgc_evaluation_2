@@ -1,0 +1,114 @@
+========================================================================
+CUDA SOFTMAX - CORRECTNESS AND NUMERICAL STABILITY TEST REPORT
+Target GPU: NVIDIA GeForce RTX 3050 6GB Laptop GPU | Tolerance: 1.0e-5
+========================================================================
+
+------------------------------------------------------------------------
+TEST: Test_01_SingleElement [1x1, BlockSize=64, Impl=SharedMemCached]
+Description: Minimal 1x1 matrix; output must be exactly 1.0
+Result: >>> PASS <<<
+  Separate Max Abs Error : 0.000000e+00
+  Fused Max Abs Error    : 0.000000e+00
+  Fused Max Row-Sum Dev  : 0.000000e+00
+  Mismatched Elements    : 0 / 1
+------------------------------------------------------------------------
+TEST: Test_02_Demonstration [2x4, BlockSize=256, Impl=SharedMemCached]
+Description: Academic theme mandatory demonstration matrix
+Result: >>> PASS <<<
+  Separate Max Abs Error : 5.960464e-08
+  Fused Max Abs Error    : 5.960464e-08
+  Fused Max Row-Sum Dev  : 5.215406e-08
+  Mismatched Elements    : 0 / 8
+------------------------------------------------------------------------
+TEST: Test_03_AllZeros [4x8, BlockSize=128, Impl=SharedMemCached]
+Description: All zeros: row output should be perfectly uniform 1/8 = 0.125
+Result: >>> PASS <<<
+  Separate Max Abs Error : 0.000000e+00
+  Fused Max Abs Error    : 0.000000e+00
+  Fused Max Row-Sum Dev  : 0.000000e+00
+  Mismatched Elements    : 0 / 32
+------------------------------------------------------------------------
+TEST: Test_04_IdenticalElements [4x16, BlockSize=128, Impl=SharedMemCached]
+Description: Identical 7.5f values: output uniform 1/16 = 0.0625
+Result: >>> PASS <<<
+  Separate Max Abs Error : 0.000000e+00
+  Fused Max Abs Error    : 0.000000e+00
+  Fused Max Row-Sum Dev  : 0.000000e+00
+  Mismatched Elements    : 0 / 64
+------------------------------------------------------------------------
+TEST: Test_05_StrictlyPositive [8x32, BlockSize=256, Impl=SharedMemCached]
+Description: Strictly positive values range [10.0, 50.0]
+Result: >>> PASS <<<
+  Separate Max Abs Error : 5.960464e-08
+  Fused Max Abs Error    : 5.960464e-08
+  Fused Max Row-Sum Dev  : 9.011831e-08
+  Mismatched Elements    : 0 / 256
+------------------------------------------------------------------------
+TEST: Test_06_StrictlyNegative [8x32, BlockSize=256, Impl=SharedMemCached]
+Description: Strictly negative values range [-50.0, -10.0]
+Result: >>> PASS <<<
+  Separate Max Abs Error : 5.960464e-08
+  Fused Max Abs Error    : 5.960464e-08
+  Fused Max Row-Sum Dev  : 9.011831e-08
+  Mismatched Elements    : 0 / 256
+------------------------------------------------------------------------
+TEST: Test_07_ExtremePositive_Stability [4x16, BlockSize=128, Impl=SharedMemCached]
+Description: Extreme values +1000.0f: verifies safe max-subtraction prevents FP32 inf overflow
+Result: >>> PASS <<<
+  Separate Max Abs Error : 5.960464e-08
+  Fused Max Abs Error    : 5.960464e-08
+  Fused Max Row-Sum Dev  : 1.043081e-07
+  Mismatched Elements    : 0 / 64
+------------------------------------------------------------------------
+TEST: Test_08_ExtremeNegative_Stability [4x16, BlockSize=128, Impl=SharedMemCached]
+Description: Extreme negative -1000.0f: verifies safe handling without zero-division NaN
+Result: >>> PASS <<<
+  Separate Max Abs Error : 2.145702e-28
+  Fused Max Abs Error    : 2.145702e-28
+  Fused Max Row-Sum Dev  : 0.000000e+00
+  Mismatched Elements    : 0 / 64
+------------------------------------------------------------------------
+TEST: Test_09_NonPowerOfTwo_Cols [128x127, BlockSize=256, Impl=SharedMemCached]
+Description: Cols=127 (non-power-of-two): tests boundary conditions and shared reductions
+Result: >>> PASS <<<
+  Separate Max Abs Error : 0.000000e+00
+  Fused Max Abs Error    : 0.000000e+00
+  Fused Max Row-Sum Dev  : 5.774200e-08
+  Mismatched Elements    : 0 / 16256
+------------------------------------------------------------------------
+TEST: Test_10_Irregular_1024x1000 [1024x1000, BlockSize=256, Impl=SharedMemCached]
+Description: 1024x1000 irregular large matrix with arbitrary values
+Result: >>> PASS <<<
+  Separate Max Abs Error : 0.000000e+00
+  Fused Max Abs Error    : 0.000000e+00
+  Fused Max Row-Sum Dev  : 5.587935e-08
+  Mismatched Elements    : 0 / 1024000
+------------------------------------------------------------------------
+TEST: Test_11_RowsWiderThanBlockSize_2048 [512x2048, BlockSize=256, Impl=SharedMemCached]
+Description: Cols=2048 > BlockSize=256: tests multi-pass block-strided loop in single block
+Result: >>> PASS <<<
+  Separate Max Abs Error : 0.000000e+00
+  Fused Max Abs Error    : 0.000000e+00
+  Fused Max Row-Sum Dev  : 4.330650e-08
+  Mismatched Elements    : 0 / 1048576
+------------------------------------------------------------------------
+TEST: Test_12_VeryLongRows_4096 [256x4096, BlockSize=256, Impl=SharedMemCached]
+Description: Cols=4096: cached in dynamic shared memory (4096*4 = 16KB < 48KB limit)
+Result: >>> PASS <<<
+  Separate Max Abs Error : 0.000000e+00
+  Fused Max Abs Error    : 0.000000e+00
+  Fused Max Row-Sum Dev  : 4.726462e-08
+  Mismatched Elements    : 0 / 1048576
+------------------------------------------------------------------------
+TEST: Test_13_StreamingFallback_16384 [64x16384, BlockSize=256, Impl=StreamingFallback]
+Description: Cols=16384 exceeds 48KB smem: verifies automatic streaming fallback
+Result: >>> PASS <<<
+  Separate Max Abs Error : 0.000000e+00
+  Fused Max Abs Error    : 0.000000e+00
+  Fused Max Row-Sum Dev  : 3.950845e-08
+  Mismatched Elements    : 0 / 1048576
+
+========================================================================
+TEST SUITE SUMMARY: 13 / 13 PASSED
+OVERALL STATUS: ALL TESTS PASSED [PASS]
+========================================================================
